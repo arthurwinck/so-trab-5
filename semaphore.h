@@ -23,7 +23,7 @@ private:
 
     // Thread operations
     void sleep();
-    void wakeup();
+    void wakeup(Thread* wakeup_thread);
     void wakeup_all();
 
 private:

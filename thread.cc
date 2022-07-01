@@ -10,6 +10,7 @@ int unsigned Thread::thread_count = 0;
 Thread* Thread::_running = 0;
 Thread::Ready_Queue Thread::_ready;
 Thread::Sus_Queue Thread::_suspension;
+Thread::Wait_Queue Thread::_waiting;
 Thread Thread::_dispatcher;
 Thread Thread::_main;
 CPU::Context Thread::_main_context;
@@ -23,9 +24,9 @@ void Thread::thread_exit(int exit_code) {
     //thread_exit chama o yield
     
     //Retomar a execução da thread que chamou join
-    if (this->_waiting_bool) {
-        Thread* waiting_thread = Thread::_suspension.remove(&this->_waiting_link)->object();
-        waiting_thread->resume(); 
+    if (this->_suspended_bool) {
+        Thread* suspended_thread = Thread::_suspension.remove(&this->_suspended_link)->object();
+        suspended_thread->resume(); 
         this->_exit_code = exit_code;       
         // Setar exit_code para id da thread
         // Mudar a thread para a thread que deu join
@@ -45,9 +46,8 @@ void Thread::thread_exit(int exit_code) {
 // Mas o objeto que executou foi da thread que vamos esperar
 // Retornar o código de thread exit
 int Thread::join() {
-    //Setar id_waiting para a thread que está esperando essa thread finalizar
-    this->_waiting_link = _running->_link;
-    this->_waiting_bool = 1;
+    this->_suspended_link = _running->_link;
+    this->_suspended_bool = 1;
     this->_exit_code = this->id();
     _running->suspend();
 
@@ -205,11 +205,45 @@ void Thread::dispatcher() {
 
 }
 
+void Thread::sleep() {
+    db<Thread>(TRC) << "Thread iniciou sleep do semáforo\n";
+    if (this->_state != State::BLOCKED) {
+        this->_state = State::BLOCKED;
+
+        _waiting.insert_tail(&this->_link);
+    }
+    Thread::yield();
+}
+
+void Thread::wakeup() {
+    db<Thread>(TRC) << "Thread iniciou wakeup do semáforo\n";
+    if (this->_state == State::BLOCKED) {
+        // A princípio sempre pega-se sempre o primeiro da fila
+        // Provavelmente na função do semaphore primeiro pegamos o primeiro
+        Thread* waking_thread = _waiting.remove(&this->_wait_link)->object();
+        waking_thread->_state = State::READY;
+        _ready.insert(&this->_link);
+    }
+
+}
+
 Thread::~Thread() {
     int id = this->id();
     db<Thread>(TRC) << "Desconstrutor da thread:" << id <<"\n";
     if (this->_context) {
         delete this->_context;
+    }
+}
+
+Thread* Thread::get_first_waiting() {
+    return _waiting.remove_head()->object(); 
+}
+
+void Thread::wakeup_all() {
+    // Provavelmente existe uma maneira mais elegante de fazer isso
+    for (int i=0; i < _waiting.size(); i++) {
+        Thread* thread = _waiting.remove_head()->object();
+        thread->wakeup();
     }
 }
 

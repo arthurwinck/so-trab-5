@@ -18,13 +18,16 @@ public:
 
     typedef Ordered_List<Thread> Ready_Queue;
     typedef Ordered_List<Thread> Sus_Queue; /*T4=Queue*/
+    typedef Ordered_List<Thread> Wait_Queue; /*T4=Queue*/
+    
 
     // Thread State
     enum State {
         RUNNING,
         READY,
         FINISHING,
-        SUSPENDED
+        SUSPENDED,
+        BLOCKED
     };
 
     /*
@@ -104,6 +107,14 @@ public:
      * Qualquer outro método que você achar necessário para a solução.
      */ 
 
+    void sleep();
+
+    static Thread* get_first_waiting();
+
+    void wakeup();
+
+    static void wakeup_all();
+
 private:
     int _id;
     Context * volatile _context;
@@ -113,13 +124,15 @@ private:
     static CPU::Context _main_context;
     static Thread _dispatcher;
     static Ready_Queue _ready;
-    static Sus_Queue _suspension; //Queue para elemntos suspensos
     Ready_Queue::Element _link;
-    //Sus_Queue::Element _linksus adcionar element do queue/
+    static Sus_Queue _suspension; //Queue para elemntos suspensos
+    static Wait_Queue _waiting; // Queue para elementos bloqueados (esperando semáforo)
     volatile State _state;
     volatile int _exit_code;
-    Sus_Queue::Element _waiting_link;
-    volatile int _waiting_bool;
+    Sus_Queue::Element _suspended_link;
+    Wait_Queue::Element _wait_link;
+    volatile int _suspended_bool;
+    
 
     /*
      * Qualquer outro atributo que você achar necessário para a solução.
@@ -142,8 +155,8 @@ inline Thread::Thread(void (* entry)(Tn ...), Tn ... an) : _link(this, (std::chr
     this->_state = State::READY;
 
     //Essa thread não está em nenhum join no momento, setamos então id_waiting para -1
-    this->_waiting_link = NULL;
-    this->_waiting_bool = 0;
+    this->_suspended_link = NULL;
+    this->_suspended_bool = 0;
 
     // Preciso realizar a atribuição de new (?) e adicionar o elemento na fila
     // Inserir a thread na fila de prontos
