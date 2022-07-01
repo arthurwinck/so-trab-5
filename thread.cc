@@ -46,10 +46,10 @@ void Thread::thread_exit(int exit_code) {
 // Retornar o código de thread exit
 int Thread::join() {
     //Setar id_waiting para a thread que está esperando essa thread finalizar
-    this->_waiting_link = _running->_link;
+    this->_waiting_link = running()->_link;
     this->_waiting_bool = 1;
     this->_exit_code = this->id();
-    _running->suspend();
+    running()->suspend();
 
     return this->_exit_code;
 }
@@ -62,6 +62,25 @@ void Thread::suspend() {
         _suspension.insert(&this->_link);
     }
     Thread::yield();
+}
+//implementação inicial de sleep e wake, feitas com base no suspend e resume.
+
+void Thread::sleep(){
+    db<Thread>(TRC) << "Thread iniciou sleep\n";
+    if (this->_state != State::WAITING) {
+        this->_state = State::WAITING;
+
+        _waiting.insert(&this->_link);
+    }
+}
+
+void Thread::wake() {
+    db<Thread>(TRC) << "Thread está acordando\n";
+    
+    this->_state = State::READY;
+
+    _waiting.remove(&this->_link);
+    _ready.insert(&this->_link);
 }
 
 void Thread::resume(){

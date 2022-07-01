@@ -18,13 +18,15 @@ public:
 
     typedef Ordered_List<Thread> Ready_Queue;
     typedef Ordered_List<Thread> Sus_Queue; /*T4=Queue*/
-
+    typedef Ordered_List<Thread> Wait_Queue; /*T5-Queue Waiting*/
+    //T5-Adcionou métodos e fila para WAITING
     // Thread State
     enum State {
         RUNNING,
         READY,
         FINISHING,
-        SUSPENDED
+        SUSPENDED,
+        WAITING
     };
 
     /*
@@ -45,6 +47,10 @@ public:
      * Retorna a Thread que está em execução.
      */ 
     static Thread * running() { return _running; }
+
+    //Retorna a lista em espera
+
+    static Wait_Queue waiting() {return _waiting;}
 
     /*
      * Método para trocar o contexto entre duas thread, a anterior (prev)
@@ -75,6 +81,10 @@ public:
     int join();
 
     void suspend();
+
+    void sleep();
+
+    void wake();
 
     void resume();
 
@@ -114,11 +124,13 @@ private:
     static Thread _dispatcher;
     static Ready_Queue _ready;
     static Sus_Queue _suspension; //Queue para elemntos suspensos
+    static Wait_Queue _waiting;
     Ready_Queue::Element _link;
-    //Sus_Queue::Element _linksus adcionar element do queue/
+    Sus_Queue::Element _waiting_link;
+    //eita,waiting_link já existe, verificar depois
     volatile State _state;
     volatile int _exit_code;
-    Sus_Queue::Element _waiting_link;
+    
     volatile int _waiting_bool;
 
     /*
