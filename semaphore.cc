@@ -7,6 +7,8 @@ __BEGIN_API
 // Se ele deu wait quer dizer que podemos pegar o running para dar sleep?
 
 // wait
+    
+
 void Semaphore::p() {
     // Checar se o num de licenças é > 0, se sim decrementar com
     // fdec e continuar execução (retornar (?))
@@ -36,13 +38,13 @@ void Semaphore::v() {
 int Semaphore::finc(volatile int & number) {
     // Implementar incremento atômico (ver pdf)
     int value = 1;
-    //asm("lock xadd %0, %2" : "=a" (number) : "a" (number), "b" (value));
+    asm("xadd %0, %2" : "=a" (number) : "a" (number), "b" (value));
 }
 
 int Semaphore::fdec(volatile int & number) {
     // Implementar decremento atômico (ver pdf)
     int value = -1;
-    //asm("lock xadd %0, %2" : "=a" (number) : "a" (number), "b" (value));
+    asm("xadd %0, %2" : "=a" (number) : "a" (number), "b" (value));
 }
 
 void Semaphore::sleep() {

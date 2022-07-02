@@ -236,7 +236,12 @@ Thread::~Thread() {
 }
 
 Thread* Thread::get_first_waiting() {
-    return _waiting.remove_head()->object(); 
+    db<Thread>(TRC) << "gET FIRST da thread:" <<"\n";
+    if (!(_waiting.empty())){
+        return _waiting.remove_head()->object(); 
+    } else {
+        return NULL;
+    }
 }
 
 void Thread::wakeup_all() {
