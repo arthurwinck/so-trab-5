@@ -18,8 +18,8 @@ public:
     void v();
 private:
     // Atomic operations
-    int finc(volatile int & number);
-    int fdec(volatile int & number);
+    int finc(volatile int & number) {return CPU::finc(number)};
+    int fdec(volatile int & number) {return CPU::fdec(number)};
 
     // Thread operations
     void sleep();
@@ -29,6 +29,7 @@ private:
 private:
     //DECLARAÇÃO DOS ATRIBUTOS DO SEMÁFORO
     volatile int license_num;
+    //Queue Queue
 };
 
 __END_API

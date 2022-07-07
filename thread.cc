@@ -252,4 +252,16 @@ void Thread::wakeup_all() {
     }
 }
 
+// Quando wakeup acordar todas as threads, _waiting
+// precisa ser zerado = 0
+
+// Função é estátitca e recebe 
+// Thread::sleep(queue Q){
+    //t = running();
+    // t-> _waiting Q; // -> _waiting fila
+
+    //prev->_waiting = q;
+//}
+void
+
 __END_API

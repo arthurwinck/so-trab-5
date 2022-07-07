@@ -18,6 +18,15 @@ void Semaphore::p() {
     } else {
         sleep();
     }
+
+    //begin_atomic();
+    /// if(fdec(_value) < 1) {
+        //sleep
+    //} else {
+        //end_atomic();
+    //}
+
+
 }
 
 // post
@@ -33,18 +42,31 @@ void Semaphore::v() {
     // Checar se existe threads na lista de threads esperando
     // Se sim dar wake na primeira thread da fila
     // Se não incrementar o num de licenças com finc
+
+
+    /* 
+    being_atomic();
+    if(finc(_value)) < 0) {
+        wakeup(); //implicit end_atomic;
+    else
+        end_atomic();
+    }
+    
+    */
+
 }
 
 int Semaphore::finc(volatile int & number) {
     // Implementar incremento atômico (ver pdf)
-    int value = 1;
-    asm("xadd %0, %2" : "=a" (number) : "a" (number), "b" (value));
+    register T value = 1;
+    asm("lock xadd %0, %2;" : "=a" (number) : "a" (number), "b" (value) : "memory");
+    return value;
 }
 
 int Semaphore::fdec(volatile int & number) {
     // Implementar decremento atômico (ver pdf)
     int value = -1;
-    asm("xadd %0, %2" : "=a" (number) : "a" (number), "b" (value));
+    asm("lock xadd %0, %2;" : "=a" (number) : "a" (number), "b" (value) : "memory");
 }
 
 void Semaphore::sleep() {
@@ -66,6 +88,11 @@ void Semaphore::wakeup_all() {
     //Implementar thread wakeup_all
     // Acordar todas as threads -- Quando vamos fazer isso?
     Thread::wakeup_all();
+
+    /*
+    Thread * t = q->remove()
+    
+    */
 }
 
 Semaphore::Semaphore(int v){
@@ -74,7 +101,12 @@ Semaphore::Semaphore(int v){
 }
 
 Semaphore::~Semaphore() {
+    // wakeup all
     // A princípio não temos nada a desalocar...
 }
 
+
+// void Thread::reschedule() {
+//     yield();
+// }
 __END_API

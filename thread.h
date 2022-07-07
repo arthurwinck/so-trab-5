@@ -143,6 +143,7 @@ private:
 template<typename ... Tn>
 inline Thread::Thread(void (* entry)(Tn ...), Tn ... an) : _link(this, (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()))
 {
+    //: ... _waiting(0) 
     //IMPLEMENTAÇÃO DO CONSTRUTOR
     //UPDATE: Chamada do debugger
     db<Thread>(TRC) << "Thread::Thread(): criou thread\n";
