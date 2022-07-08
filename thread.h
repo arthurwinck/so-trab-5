@@ -18,7 +18,6 @@ public:
 
     typedef Ordered_List<Thread> Ready_Queue;
     typedef Ordered_List<Thread> Sus_Queue; /*T4=Queue*/
-    typedef Ordered_List<Thread> Wait_Queue; /*T4=Queue*/
     
 
     // Thread State
@@ -27,7 +26,9 @@ public:
         READY,
         FINISHING,
         SUSPENDED,
-        BLOCKED
+        BLOCKED,
+        SLEEPING,
+        WAKING
     };
 
     /*
@@ -107,13 +108,10 @@ public:
      * Qualquer outro método que você achar necessário para a solução.
      */ 
 
-    void sleep();
+    static void sleep(Ordered_List<Thread>* _wait);
+    static void wakeup(Ordered_List<Thread>* _wait);
 
-    static Thread* get_first_waiting();
-
-    void wakeup();
-
-    static void wakeup_all();
+    static void wakeup_all(Ordered_List<Thread>* _wait);
 
 private:
     int _id;
@@ -126,12 +124,12 @@ private:
     static Ready_Queue _ready;
     Ready_Queue::Element _link;
     static Sus_Queue _suspension; //Queue para elemntos suspensos
-    static Wait_Queue _waiting; // Queue para elementos bloqueados (esperando semáforo)
+    volatile int _suspended_bool;
+    Sus_Queue::Element _suspended_link;
     volatile State _state;
     volatile int _exit_code;
-    Sus_Queue::Element _suspended_link;
-    Wait_Queue::Element _wait_link;
-    volatile int _suspended_bool;
+    Ready_Queue* _wait;
+    
     
 
     /*

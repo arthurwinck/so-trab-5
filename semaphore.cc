@@ -56,29 +56,13 @@ void Semaphore::v() {
 
 }
 
-int Semaphore::finc(volatile int & number) {
-    // Implementar incremento atômico (ver pdf)
-    register T value = 1;
-    asm("lock xadd %0, %2;" : "=a" (number) : "a" (number), "b" (value) : "memory");
-    return value;
-}
-
-int Semaphore::fdec(volatile int & number) {
-    // Implementar decremento atômico (ver pdf)
-    int value = -1;
-    asm("lock xadd %0, %2;" : "=a" (number) : "a" (number), "b" (value) : "memory");
-}
-
 void Semaphore::sleep() {
-    Thread* running = Thread::running();
-    running->sleep();
-    // Implementar thread sleep
-    // Trocar status da thread para waiting e colocar thread na 
-    // fila de threads esperando
+    //chama sleep passando a fila e coloca o running na fila do waiting
+    Thread::sleep(this->_wait);
 }
 
-void Semaphore::wakeup(Thread* wakeup_thread) {
-    wakeup_thread->wakeup();
+void Semaphore::wakeup() {
+    Thread::wakeup()
     // Implementar thread wakeup
     // "Acordar" a thread, resumir sua execução
     // Por enquanto não tem muita utilidade a não ser realizar a chamada para wakeup da thread

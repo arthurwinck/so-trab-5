@@ -42,6 +42,11 @@ class CPU
                 return -1;
             }
         }
+
+        // Decremento e incremento de uma variável de forma atômica
+        static int finc(volatile int & number);
+        static int fdec(volatile int & number);
+              
 };
 
 //Construtor da classe usando variadic templates

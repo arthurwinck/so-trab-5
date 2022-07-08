@@ -18,6 +18,19 @@ void CPU::Context::load()
     //restaura o contexto salvo apontado pelo _context
 }
 
+int CPU::finc(volatile int & number) {
+    register int value = 1;
+    asm("lock xadd %0, %2;" : "=a" (value) : "a" (number), "b" (value) : "memory");
+    return value;
+}
+
+int CPU::fdec(volatile int & number) {
+    register int value = -1;
+    asm("lock xadd %0, %2;" : "=a" (value) : "a" (number), "b" (value) : "memory");
+    return value;
+}
+
+
 CPU::Context::~Context()
 {
     //adicionar implementação

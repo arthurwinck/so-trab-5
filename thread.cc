@@ -10,7 +10,6 @@ int unsigned Thread::thread_count = 0;
 Thread* Thread::_running = 0;
 Thread::Ready_Queue Thread::_ready;
 Thread::Sus_Queue Thread::_suspension;
-Thread::Wait_Queue Thread::_waiting;
 Thread Thread::_dispatcher;
 Thread Thread::_main;
 CPU::Context Thread::_main_context;
@@ -205,24 +204,25 @@ void Thread::dispatcher() {
 
 }
 
-void Thread::sleep() {
-    db<Thread>(TRC) << "Thread iniciou sleep do semáforo\n";
-    if (this->_state != State::BLOCKED) {
-        this->_state = State::BLOCKED;
-
-        _waiting.insert_tail(&this->_link);
-    }
-    Thread::yield();
+void Thread::sleep(Ordered_List<Thread>* _wait) {
+    Thread* prev = _running;
+    db<Thread>(TRC) << "Thread" << prev->id() << "is going to sleep\n";
+    prev->_state = State::SLEEPING;
+    _wait->insert_tail(&prev->_link);
+    prev->_wait = _wait;
+    Thread* next = _ready.remove_head()->object();
+    next->_state = State::RUNNING;
+    _running = next;
+    switch_context(prev, next);
 }
 
-void Thread::wakeup() {
-    db<Thread>(TRC) << "Thread iniciou wakeup do semáforo\n";
-    if (this->_state == State::BLOCKED) {
-        // A princípio sempre pega-se sempre o primeiro da fila
-        // Provavelmente na função do semaphore primeiro pegamos o primeiro
-        Thread* waking_thread = _waiting.remove(&this->_wait_link)->object();
+void Thread::wakeup(Ordered_List<Thread>* _wait) {
+    if (!_wait->size() > 0) {
+        Thread* waking_thread = _wait->remove_head()->object();
+        db<Thread>(TRC) << "Thread" << waking_thread->id() << "is waking up\n";
         waking_thread->_state = State::READY;
-        _ready.insert(&this->_link);
+        waking_thread->_wait = 0;
+        _ready.insert(&waking_thread->_link);
     }
 
 }
@@ -235,20 +235,19 @@ Thread::~Thread() {
     }
 }
 
-Thread* Thread::get_first_waiting() {
-    db<Thread>(TRC) << "gET FIRST da thread:" <<"\n";
-    if (!(_waiting.empty())){
-        return _waiting.remove_head()->object(); 
-    } else {
-        return NULL;
-    }
-}
+// Thread* Thread::get_first_waiting() {
+//     db<Thread>(TRC) << "gET FIRST da thread:" <<"\n";
+//     if (!(_waiting.empty())){
+//         return _waiting.remove_head()->object(); 
+//     } else {
+//         return NULL;
+//     }
+// }
 
-void Thread::wakeup_all() {
+void Thread::wakeup_all(Ordered_List<Thread>* _wait) {
     // Provavelmente existe uma maneira mais elegante de fazer isso
-    for (int i=0; i < _waiting.size(); i++) {
-        Thread* thread = _waiting.remove_head()->object();
-        thread->wakeup();
+    for (int i=0; i < _wait->size(); i++) {
+        Thread::wakeup(_wait);
     }
 }
 
@@ -262,6 +261,6 @@ void Thread::wakeup_all() {
 
     //prev->_waiting = q;
 //}
-void
+
 
 __END_API
