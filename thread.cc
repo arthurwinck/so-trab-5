@@ -207,7 +207,7 @@ void Thread::dispatcher() {
 void Thread::sleep(Ordered_List<Thread>* _wait) {
     Thread* prev = _running;
     db<Thread>(TRC) << "Thread" << prev->id() << "is going to sleep\n";
-    prev->_state = State::SLEEPING;
+    prev->_state = State::WAITING;
     _wait->insert_tail(&prev->_link);
     prev->_wait = _wait;
     Thread* next = _ready.remove_head()->object();
@@ -223,8 +223,16 @@ void Thread::wakeup(Ordered_List<Thread>* _wait) {
         waking_thread->_state = State::READY;
         waking_thread->_wait = 0;
         _ready.insert(&waking_thread->_link);
+        yield();
     }
 
+}
+
+void Thread::wakeup_all(Ordered_List<Thread>* _wait) {
+    // Provavelmente existe uma maneira mais elegante de fazer isso
+    for (int i=0; i < _wait->size(); i++) {
+        Thread::wakeup(_wait);
+    }
 }
 
 Thread::~Thread() {
@@ -234,33 +242,6 @@ Thread::~Thread() {
         delete this->_context;
     }
 }
-
-// Thread* Thread::get_first_waiting() {
-//     db<Thread>(TRC) << "gET FIRST da thread:" <<"\n";
-//     if (!(_waiting.empty())){
-//         return _waiting.remove_head()->object(); 
-//     } else {
-//         return NULL;
-//     }
-// }
-
-void Thread::wakeup_all(Ordered_List<Thread>* _wait) {
-    // Provavelmente existe uma maneira mais elegante de fazer isso
-    for (int i=0; i < _wait->size(); i++) {
-        Thread::wakeup(_wait);
-    }
-}
-
-// Quando wakeup acordar todas as threads, _waiting
-// precisa ser zerado = 0
-
-// Função é estátitca e recebe 
-// Thread::sleep(queue Q){
-    //t = running();
-    // t-> _waiting Q; // -> _waiting fila
-
-    //prev->_waiting = q;
-//}
 
 
 __END_API

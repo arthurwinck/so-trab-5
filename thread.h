@@ -27,8 +27,7 @@ public:
         FINISHING,
         SUSPENDED,
         BLOCKED,
-        SLEEPING,
-        WAKING
+        WAITING
     };
 
     /*
@@ -110,7 +109,6 @@ public:
 
     static void sleep(Ordered_List<Thread>* _wait);
     static void wakeup(Ordered_List<Thread>* _wait);
-
     static void wakeup_all(Ordered_List<Thread>* _wait);
 
 private:
