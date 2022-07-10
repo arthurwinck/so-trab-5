@@ -24,10 +24,9 @@ void Semaphore::p() {
 // post
 void Semaphore::v() {
     if(finc(license_num) < 0) {
-        db<Semaphore>(TRC) << "V() - Número de licenças: " << license_num;
+        db<Semaphore>(TRC) << "V() - Número de licenças: " << license_num << "\n";
         wakeup();
     }
-    
     /* 
     being_atomic();
     if(finc(_value)) < 0) {

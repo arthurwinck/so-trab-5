@@ -211,7 +211,7 @@ void Thread::sleep(Ordered_List<Thread>* _wait) {
 }
 
 void Thread::wakeup(Ordered_List<Thread>* _wait) {
-    if (!_wait->size() > 0) {
+    if (_wait->size() > 0) {
         Thread* waking_thread = _wait->remove_head()->object();
         db<Thread>(TRC) << "Thread " << waking_thread->id() << " irá acordar\n";
         waking_thread->_state = State::READY;
