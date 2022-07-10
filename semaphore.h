@@ -35,7 +35,7 @@ private:
     //DECLARAÇÃO DOS ATRIBUTOS DO SEMÁFORO
     volatile int license_num;
     //Queue Queue
-    volatile Wait_Queue _wait;
+    Ordered_List<Thread> _wait;
 
 
 };

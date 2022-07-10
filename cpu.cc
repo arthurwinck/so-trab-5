@@ -20,13 +20,13 @@ void CPU::Context::load()
 
 int CPU::finc(volatile int & number) {
     register int value = 1;
-    asm("lock xadd %0, %2;" : "=a" (value) : "a" (number), "b" (value) : "memory");
+    asm("lock xadd %0, %1;" : "=r" (value) : "m" (number), "0" (value) : "memory");
     return value;
 }
 
 int CPU::fdec(volatile int & number) {
     register int value = -1;
-    asm("lock xadd %0, %2;" : "=a" (value) : "a" (number), "b" (value) : "memory");
+    asm("lock xadd %0, %1;" : "=r" (value) : "m" (number), "0" (value) : "memory");
     return value;
 }
 

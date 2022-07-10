@@ -54,7 +54,7 @@ int Thread::join() {
 }
 
 void Thread::suspend() {
-    db<Thread>(TRC) << "Thread iniciou suspensão\n";
+    db<Thread>(TRC) << "Thread " << this->id() << " iniciou suspensão\n";
     if (this->_state != State::SUSPENDED) {
         this->_state = State::SUSPENDED;
 
@@ -167,12 +167,6 @@ void Thread::dispatcher() {
         int id = (*next_element->object()).id();
         db<Thread>(TRC) << "ID que a Dispatcher selecionou:" << id << "\n";
 
-        //Iterar sobre a lista até encontrar uma thread que n seja a dispatcher
-        // while (next_element->object()->_id != 1) {
-        //     // Talvez n seja o melhor jeito, revisar outros métodos de list
-        //     Ready_Queue::Element* next_element = next_element->next();
-        // }
-
         Thread* next_thread = next_element->object(); // Pegar o objeto Thread de dentro do elemento
             
 
@@ -206,7 +200,7 @@ void Thread::dispatcher() {
 
 void Thread::sleep(Ordered_List<Thread>* _wait) {
     Thread* prev = _running;
-    db<Thread>(TRC) << "Thread" << prev->id() << "is going to sleep\n";
+    db<Thread>(TRC) << "Thread " << prev->id() << " irá dormir\n";
     prev->_state = State::WAITING;
     _wait->insert_tail(&prev->_link);
     prev->_wait = _wait;
@@ -219,7 +213,7 @@ void Thread::sleep(Ordered_List<Thread>* _wait) {
 void Thread::wakeup(Ordered_List<Thread>* _wait) {
     if (!_wait->size() > 0) {
         Thread* waking_thread = _wait->remove_head()->object();
-        db<Thread>(TRC) << "Thread" << waking_thread->id() << "is waking up\n";
+        db<Thread>(TRC) << "Thread " << waking_thread->id() << " irá acordar\n";
         waking_thread->_state = State::READY;
         waking_thread->_wait = 0;
         _ready.insert(&waking_thread->_link);
@@ -237,7 +231,7 @@ void Thread::wakeup_all(Ordered_List<Thread>* _wait) {
 
 Thread::~Thread() {
     int id = this->id();
-    db<Thread>(TRC) << "Desconstrutor da thread:" << id <<"\n";
+    db<Thread>(TRC) << "Desconstrutor da thread: " << id <<"\n";
     if (this->_context) {
         delete this->_context;
     }
