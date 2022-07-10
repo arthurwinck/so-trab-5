@@ -1,16 +1,16 @@
 #include "semaphore.h"
 #include "thread.h"
+#include "traits.h"
 
 __BEGIN_API    
 
+//wait
 void Semaphore::p() {
     //begin_atomic();
     if (fdec(license_num) < 1) {
+        db<Semaphore>(TRC) << "P() - Número de licenças: " << license_num << "\n";
         sleep();
-    //} else {
-        //end_atomic();
     }
-
     //begin_atomic();
     /// if(fdec(_value) < 1) {
         //sleep
@@ -23,11 +23,9 @@ void Semaphore::p() {
 
 // post
 void Semaphore::v() {
-    //being_atomic();
     if(finc(license_num) < 0) {
-        wakeup(); //implicit end_atomic;
-    //else {
-        //end_atomic();
+        db<Semaphore>(TRC) << "V() - Número de licenças: " << license_num;
+        wakeup();
     }
     
     /* 
@@ -55,10 +53,11 @@ void Semaphore::wakeup_all() {
 }
 
 Semaphore::Semaphore(int v){
-    license_num = v;
+    this->license_num = v;
 }
 
 Semaphore::~Semaphore() {
+    db<Semaphore>(TRC) << "Semáforo sendo destruído\n";
     Thread::wakeup_all(&this->_wait);
 }
 

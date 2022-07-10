@@ -15,6 +15,7 @@ class Debug; //declaração do Debug para que possamos colocar os atributos
 class System; // declaração das classes
 class Thread; //...
 class Lists;
+class Semaphore;
 
 //declaração da classe Traits
 template<typename T>
@@ -32,11 +33,15 @@ template<> struct Traits<CPU> : public Traits<void> {
 };
 
 template<> struct Traits<Thread> : public Traits<void> {
-    static const bool debugged = true;
+    static const bool debugged = false;
 };
 
 template<> struct Traits<Lists> : public Traits<void> {
     static const bool debugged = false;
+};
+
+template<> struct Traits<Semaphore> : public Traits<void> {
+    static const bool debugged = true;
 };
 
 
